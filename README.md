@@ -3,6 +3,13 @@
 A modern Task & Project Management System built with a Next.js frontend and Node.js/Express backend.
 
 ---
+
+## Preview
+
+[▶️ Watch demo](demo.mp4)
+
+
+---
 ## Deployment
 
 - **Frontend:** Deployed on Vercel — [Deployed Link](https://taskflow-theta-five.vercel.app/)
