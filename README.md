@@ -65,6 +65,28 @@ npm run dev
 
 ---
 
+## Architecture
+
+This project uses a modern full-stack architecture:
+
+- **Frontend:**
+  - Built with Next.js (React framework) for server-side rendering and fast client-side navigation.
+  - Uses environment variables (e.g., `NEXT_PUBLIC_API_URL`) to connect to the backend API.
+  - Deployed on Vercel for global scalability and performance.
+
+- **Backend:**
+  - Node.js with Express.js for RESTful API endpoints.
+  - Connects to MongoDB (Atlas or local) for data storage.
+  - Handles authentication, business logic, and data management.
+  - Deployed on Google Cloud Platform (GCP) for reliability.
+
+- **Communication:**
+  - The frontend communicates with the backend via HTTP API calls using the URL specified in the environment variable.
+
+This separation allows independent deployment, scaling, and development of frontend and backend services.
+
+---
+
 ## Usage
 - Register a new account or log in.
 - Create projects and add tasks.
