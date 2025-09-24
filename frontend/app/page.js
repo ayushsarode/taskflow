@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { FaTasks, FaProjectDiagram, FaChartLine, FaRocket, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 
 export default function Page() {
+  const router = useRouter();
   useEffect(() => {
     AOS.init({
       duration: 800,
