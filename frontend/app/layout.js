@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-900 [font-family:Inter,system-ui,Arial]">
         <AuthProvider>
           <Header />
-          <div className="mx-auto max-w-[80%] px-6 py-8">{children}</div>
+           <div className="mx-auto px-6 py-8 lg:max-w-[80%]">{children}</div>
         </AuthProvider>
       </body>
     </html>
