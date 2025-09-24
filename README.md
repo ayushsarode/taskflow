@@ -5,7 +5,7 @@ A modern Task & Project Management System built with a Next.js frontend and Node
 ---
 ## Deployment
 
-- **Frontend:** Deployed on Vercel — [https://taskflow.vercel.app](https://taskflow.vercel.app)
+- **Frontend:** Deployed on Vercel — [Deployed Link](https://taskflow-theta-five.vercel.app/)
 - **Backend:** Deployed on Google Cloud Platform (GCP)
 ---
 
@@ -62,6 +62,17 @@ npm run dev
 
 - The frontend will be available at `http://localhost:3000`
 - The backend will be available at `http://localhost:4000` 
+
+---
+
+## Testing
+
+To run the backend test suite:
+
+```bash
+cd backend
+npm test
+```
 
 ---
 
