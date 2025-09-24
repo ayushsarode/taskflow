@@ -1,4 +1,4 @@
-export const metadata = { title: 'SvaraAI Task Manager', description: 'Task & Project Management System' };
+export const metadata = { title: 'taskflow', description: 'Task & Project Management System' };
 import './globals.css';
 import { AuthProvider } from '../context/AuthContext.jsx';
 import Header from './components/Header.jsx';
