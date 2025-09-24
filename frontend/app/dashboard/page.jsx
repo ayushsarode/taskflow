@@ -211,7 +211,7 @@ export default function DashboardPage() {
               <FaTasks className="text-blue-500" />
               Tasks by Status
             </h3>
-            <div className="h-54">
+            <div className="h-58">
               {allTasks.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
