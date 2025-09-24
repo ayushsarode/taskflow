@@ -5,7 +5,7 @@ A modern Task & Project Management System built with a Next.js frontend and Node
 ---
 
 ## Preview  
-Click to watch the demo video 👇  
+Click the image to watch the demo video 👇  
 
 [![demo video](https://img.youtube.com/vi/_6hQY4kVWsk/0.jpg)](https://youtu.be/_6hQY4kVWsk)
 
