@@ -11,6 +11,8 @@ import {
   FaPlus,
   FaClock,
   FaSpinner,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 
 const statusColumns = [
@@ -80,12 +82,48 @@ export default function ProjectBoard({ params }) {
     description: "",
   });
   const [isDragLoading, setIsDragLoading] = useState(false);
+  
+  // Pagination state for each column
+  const [pagination, setPagination] = useState({
+    todo: { page: 1, itemsPerPage: 5 },
+    "in-progress": { page: 1, itemsPerPage: 5 },
+    done: { page: 1, itemsPerPage: 5 },
+  });
 
   const grouped = useMemo(() => {
     const g = { todo: [], "in-progress": [], done: [] };
     for (const t of tasks) g[t.status]?.push(t);
     return g;
   }, [tasks]);
+
+  // Paginated data for each column
+  const paginatedData = useMemo(() => {
+    const result = {};
+    statusColumns.forEach(col => {
+      const columnTasks = grouped[col.key];
+      const { page, itemsPerPage } = pagination[col.key];
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      
+      result[col.key] = {
+        tasks: columnTasks.slice(startIndex, endIndex),
+        totalTasks: columnTasks.length,
+        totalPages: Math.ceil(columnTasks.length / itemsPerPage),
+        currentPage: page,
+      };
+    });
+    return result;
+  }, [grouped, pagination]);
+
+  const changePage = (columnKey, newPage) => {
+    setPagination(prev => ({
+      ...prev,
+      [columnKey]: {
+        ...prev[columnKey],
+        page: newPage,
+      },
+    }));
+  };
 
   async function load() {
     const res = await api.get(`/api/tasks/project/${projectId}`);
@@ -107,6 +145,12 @@ export default function ProjectBoard({ params }) {
         status: destination.droppableId,
       });
       await load();
+      // Reset pagination for affected columns
+      setPagination(prev => ({
+        ...prev,
+        [result.source.droppableId]: { ...prev[result.source.droppableId], page: 1 },
+        [destination.droppableId]: { ...prev[destination.droppableId], page: 1 },
+      }));
     } catch (error) {
       console.error("Failed to update task:", error);
     } finally {
@@ -139,6 +183,11 @@ export default function ProjectBoard({ params }) {
       description: "",
     });
     await load();
+    // Reset pagination for the target column
+    setPagination(prev => ({
+      ...prev,
+      [form.status]: { ...prev[form.status], page: 1 },
+    }));
   }
 
   function openEditTask(task) {
@@ -168,6 +217,14 @@ export default function ProjectBoard({ params }) {
       await api.delete(`/api/tasks/${deleteModal.taskId}`);
       setDeleteModal({ open: false, taskId: null, taskTitle: "" });
       await load();
+      // Reset pagination for all columns
+      setPagination(prev => {
+        const newPagination = {};
+        Object.keys(prev).forEach(key => {
+          newPagination[key] = { ...prev[key], page: 1 };
+        });
+        return newPagination;
+      });
     } catch (error) {
       console.error("Failed to delete task:", error);
       setDeleteModal({ open: false, taskId: null, taskTitle: "" });
@@ -176,7 +233,7 @@ export default function ProjectBoard({ params }) {
 
   return (
     <RequireAuth>
-    <main className="min-h-screen bg-gray-50">
+    <main className="mt-5 bg-gray-50">
       <div className="max-w-7xl mx-auto p-6">
         {/* Clean Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -212,8 +269,6 @@ export default function ProjectBoard({ params }) {
               <Droppable droppableId={col.key} key={col.key}>
                 {(provided, snapshot) => (
                   <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
                     className={`rounded-lg border-2 p-4 transition-colors ${col.color} ${
                       snapshot.isDraggingOver ? 'border-blue-300 bg-blue-50' : ''
                     } ${isDragLoading ? 'opacity-75 pointer-events-none' : ''}`}
@@ -228,69 +283,111 @@ export default function ProjectBoard({ params }) {
                       </span>
                     </div>
 
-                    {/* Task Cards */}
-                    <div className="space-y-3 min-h-[200px] h-[calc(85vh-300px)] max-h-[calc(85vh-300px)] overflow-y-auto">
-                      {grouped[col.key].map((t, idx) => (
-                        <Draggable draggableId={t._id} index={idx} key={t._id}>
-                          {(p, snapshot) => (
-                            <div
-                              ref={p.innerRef}
-                              {...p.draggableProps}
-                              {...p.dragHandleProps}
-                              className={`bg-white rounded-lg border border-gray-200 p-4 cursor-pointer group hover:shadow-md transition-shadow ${
-                                snapshot.isDragging ? 'shadow-lg rotate-2' : ''
-                              } ${isDragLoading ? 'pointer-events-none' : ''}`}
-                            >
-                              {/* Task Content */}
-                              <div className="space-y-3">
-                                <div className="flex items-start justify-between gap-2">
-                                  <h4 className="font-medium text-gray-900 text-sm leading-relaxed flex-1">
-                                    {t.title}
-                                  </h4>
-                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openEditTask(t);
-                                      }}
-                                      className="text-gray-400 hover:text-blue-600 p-1 rounded transition-colors"
-                                      aria-label="Edit task"
-                                    >
-                                      <FaEdit className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteTask(t._id);
-                                      }}
-                                      className="text-gray-400 hover:text-red-600 p-1 rounded transition-colors"
-                                      aria-label="Delete task"
-                                    >
-                                      <FaTrash className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${priorityConfig(t.priority).dot}`}></div>
-                                    <span className={`text-xs px-2 py-1 rounded ${priorityConfig(t.priority).bg} ${priorityConfig(t.priority).text}`}>
-                                      {priorityConfig(t.priority).label}
-                                    </span>
-                                  </div>
-                                  {t.deadline && (
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                                      <FaClock className="w-3 h-3" />
-                                      {new Date(t.deadline).toLocaleDateString()}
+                    {/* Task Cards Container */}
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 min-h-[200px] h-[calc(85vh-300px)] max-h-[calc(85vh-300px)] flex flex-col"
+                    >
+                      {/* Tasks Area */}
+                      <div className="flex-1 space-y-3">
+                        {paginatedData[col.key].tasks.map((t, idx) => (
+                          <Draggable draggableId={t._id} index={idx} key={t._id}>
+                            {(p, snapshot) => (
+                              <div
+                                ref={p.innerRef}
+                                {...p.draggableProps}
+                                {...p.dragHandleProps}
+                                className={`bg-white rounded-lg border border-gray-200 p-4 cursor-pointer group hover:shadow-md transition-shadow ${
+                                  snapshot.isDragging ? 'shadow-lg rotate-2' : ''
+                                } ${isDragLoading ? 'pointer-events-none' : ''}`}
+                              >
+                                {/* Task Content */}
+                                <div className="space-y-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h4 className="font-medium text-gray-900 text-sm leading-relaxed flex-1">
+                                      {t.title}
+                                    </h4>
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          openEditTask(t);
+                                        }}
+                                        className="text-gray-400 hover:text-blue-600 p-1 rounded transition-colors"
+                                        aria-label="Edit task"
+                                      >
+                                        <FaEdit className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          deleteTask(t._id);
+                                        }}
+                                        className="text-gray-400 hover:text-red-600 p-1 rounded transition-colors"
+                                        aria-label="Delete task"
+                                      >
+                                        <FaTrash className="w-3 h-3" />
+                                      </button>
                                     </div>
-                                  )}
+                                  </div>
+
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-2 h-2 rounded-full ${priorityConfig(t.priority).dot}`}></div>
+                                      <span className={`text-xs px-2 py-1 rounded ${priorityConfig(t.priority).bg} ${priorityConfig(t.priority).text}`}>
+                                        {priorityConfig(t.priority).label}
+                                      </span>
+                                    </div>
+                                    {t.deadline && (
+                                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                                        <FaClock className="w-3 h-3" />
+                                        {new Date(t.deadline).toLocaleDateString()}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {paginatedData[col.key].totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+                          <button
+                            onClick={() => changePage(col.key, paginatedData[col.key].currentPage - 1)}
+                            disabled={paginatedData[col.key].currentPage === 1}
+                            className={`p-1 rounded transition-colors ${
+                              paginatedData[col.key].currentPage === 1
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-white'
+                            }`}
+                          >
+                            <FaChevronLeft className="w-3 h-3" />
+                          </button>
+                          
+                          <div className="flex items-center gap-1">
+                            <span className={`text-xs px-2 py-1 rounded ${col.countColor}`}>
+                              {paginatedData[col.key].currentPage} / {paginatedData[col.key].totalPages}
+                            </span>
+                          </div>
+                          
+                          <button
+                            onClick={() => changePage(col.key, paginatedData[col.key].currentPage + 1)}
+                            disabled={paginatedData[col.key].currentPage === paginatedData[col.key].totalPages}
+                            className={`p-1 rounded transition-colors ${
+                              paginatedData[col.key].currentPage === paginatedData[col.key].totalPages
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-white'
+                            }`}
+                          >
+                            <FaChevronRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
