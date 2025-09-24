@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { FaTasks, FaProjectDiagram, FaChartLine, FaRocket, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
-import {  ArrowRight } from 'lucide-react';
 
 
 export default function Page() {
@@ -36,7 +35,7 @@ export default function Page() {
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <button className="group inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 sm:px-8">
                 Get Started
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <FaArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md sm:px-8">
                 Learn More
