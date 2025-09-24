@@ -10,6 +10,7 @@ import {
   FaEdit,
   FaPlus,
   FaClock,
+  FaSpinner,
 } from "react-icons/fa";
 
 const statusColumns = [
@@ -78,6 +79,7 @@ export default function ProjectBoard({ params }) {
     deadline: "",
     description: "",
   });
+  const [isDragLoading, setIsDragLoading] = useState(false);
 
   const grouped = useMemo(() => {
     const g = { todo: [], "in-progress": [], done: [] };
@@ -97,10 +99,19 @@ export default function ProjectBoard({ params }) {
   async function onDragEnd(result) {
     const { destination, draggableId } = result;
     if (!destination) return;
-    await api.patch(`/api/tasks/${draggableId}`, {
-      status: destination.droppableId,
-    });
-    await load();
+    
+    setIsDragLoading(true);
+    
+    try {
+      await api.patch(`/api/tasks/${draggableId}`, {
+        status: destination.droppableId,
+      });
+      await load();
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    } finally {
+      setIsDragLoading(false);
+    }
   }
 
   async function saveTask(e) {
@@ -184,6 +195,16 @@ export default function ProjectBoard({ params }) {
           </Button>
         </div>
 
+        {/* Loading Overlay */}
+        {isDragLoading && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-40">
+            <div className="bg-white rounded-lg shadow-lg px-6 py-4 flex items-center gap-3">
+              <FaSpinner className="w-5 h-5 text-blue-600 animate-spin" />
+              <span className="text-gray-700 font-medium">Updating task...</span>
+            </div>
+          </div>
+        )}
+
         <DragDropContext onDragEnd={onDragEnd}>
           {/* Clean Kanban Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -195,7 +216,7 @@ export default function ProjectBoard({ params }) {
                     {...provided.droppableProps}
                     className={`rounded-lg border-2 p-4 transition-colors ${col.color} ${
                       snapshot.isDraggingOver ? 'border-blue-300 bg-blue-50' : ''
-                    }`}
+                    } ${isDragLoading ? 'opacity-75 pointer-events-none' : ''}`}
                   >
                     {/* Simple Column Header */}
                     <div className="flex items-center justify-between mb-4">
@@ -218,7 +239,7 @@ export default function ProjectBoard({ params }) {
                               {...p.dragHandleProps}
                               className={`bg-white rounded-lg border border-gray-200 p-4 cursor-pointer group hover:shadow-md transition-shadow ${
                                 snapshot.isDragging ? 'shadow-lg rotate-2' : ''
-                              }`}
+                              } ${isDragLoading ? 'pointer-events-none' : ''}`}
                             >
                               {/* Task Content */}
                               <div className="space-y-3">
