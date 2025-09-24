@@ -33,7 +33,10 @@ export default function Page() {
               Organize, track, and collaborate efficiently to boost productivity.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <button className="group inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 sm:px-8">
+                <button
+                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-base font-medium text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 sm:px-8"
+                onClick={() => router.push('/auth/signup')}
+              >
                 Get Started
                 <FaArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
